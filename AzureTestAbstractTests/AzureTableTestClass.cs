@@ -1,4 +1,5 @@
-﻿using AutoFixture;
+﻿using System.Linq.Expressions;
+using AutoFixture;
 using AutoFixture.Xunit2;
 using Azure;
 using Azure.Data.Tables;
@@ -8,52 +9,25 @@ using Xunit;
 
 namespace AzureTestAbstract;
 
-public class AzureTableTestClass
+public class AzureTableTestClassWithMock
 {
-    [Fact]
-    public void T_With_Emulator()
-    {
-        // arrange
-        var pKey = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
-        var accountName = "devstoreaccount1";
-        var url = "http://127.0.0.1:10002/devstoreaccount1";
-
-        var azureTableClient =
-            new AzureTableClient(new Uri(url), "tableName", new TableSharedKeyCredential(accountName, pKey));
-        var serviceClient = new AzureTableServiceClient(url,
-            new TableSharedKeyCredential("devstoreaccount1",
-                "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="));
-
-        // act
-        var sut = new TableConsumer(azureTableClient, serviceClient);
-
-        // assert
-        sut.WorkTest();
-    }
-
     [Theory]
     [AutoData]
-    public void T_With_Mock(Fixture f, string mockTableItem_Name)
+    public void T_With_Mock(TableConsumerTestsFixture f, string mockTableItem_Name)
     {
         // arrange
-        var mockTableClient = new Mock<IAbstractTableClient>();
-        var mockTableServiceClient = new Mock<IAbstractTableServiceClient>();
-        var mockTableItem = new Mock<IAbstractTableItem>();
+        var sut = f.GetSut();
 
-
-        var sut = new TableConsumer(mockTableClient.Object, mockTableServiceClient.Object);
-
-        mockTableItem.Setup(s => s.Name)
+        f.MockAbstractTableItem.Setup(s => s.Name)
             .Returns(mockTableItem_Name);
 
-        mockTableServiceClient
+        f.MockTableServiceClient
             .Setup(s => s.CreateTableIfNotExists(It.IsAny<string>()))
-            .Returns(mockTableItem.Object);
+            .Returns(f.MockAbstractTableItem.Object);
 
 
-        var abstractTableItems = f.Build<AzureTableItem>()
-            .With(x => x.Name)
-            .CreateMany();
+        var abstractTableItems = f.Create_AzureTableItems();
+
 
         var pages = new List<Page<IAbstractTableItem>>
         {
@@ -62,7 +36,7 @@ public class AzureTableTestClass
 
         var pageable = Pageable<IAbstractTableItem>.FromPages(pages);
 
-        mockTableServiceClient
+        f.MockTableServiceClient
             .Setup(s => s.Query(It.IsAny<string>()))
             .Returns(pageable);
 
@@ -77,7 +51,7 @@ public class AzureTableTestClass
         var pageableEntities = Pageable<AzureTableEntity>.FromPages(pagesEntities);
 
 
-        mockTableClient
+        f.MockTableClient
             .Setup(s => s.Query<AzureTableEntity>(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<IEnumerable<string>>(),
                 It.IsAny<CancellationToken>()))
             .Returns(pageableEntities);
@@ -87,5 +61,230 @@ public class AzureTableTestClass
         sut.WorkTest();
 
         // assert
+    }
+
+    [Theory]
+    [AutoData]
+    public void T_AddEntity(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        sut.AddEntity(pkey, rkey);
+
+        // assert
+        f.MockTableClient.Verify(v => v.AddEntity(It.IsAny<ITableEntity>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_AddEntityAsync(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        await sut.AddEntityAsync(pkey, rkey);
+
+        // assert
+        f.MockTableClient.Verify(v => v.AddEntityAsync(It.IsAny<ITableEntity>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_Query(TableConsumerTestsFixture f)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        sut.Query();
+
+        // assert
+        f.MockTableClient
+            .Verify(
+                v => v.Query(
+                    It.IsAny<Expression<Func<AzureTableEntity, bool>>>(),
+                    It.IsAny<int?>(),
+                    It.IsAny<IEnumerable<string>>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once());
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_QueryWithString(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        sut.QueryWithString();
+
+        // assert
+        f.MockTableClient
+            .Verify(
+                v => v.Query<AzureTableEntity>(
+                    It.IsAny<string>(),
+                    It.IsAny<int?>(),
+                    It.IsAny<IEnumerable<string>>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once());
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_Create(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = sut.T_Create();
+
+        // assert
+        f.MockTableClient.Verify(v => v.Create(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_CreateAsync(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = await sut.T_CreateAsync();
+
+        // assert
+        f.MockTableClient.Verify(v => v.CreateAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_DeleteAsync(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = await sut.T_DeleteAsync();
+
+        // assert
+        f.MockTableClient.Verify(v => v.DeleteAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_Delete(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = sut.T_Delete();
+
+        // assert
+        f.MockTableClient.Verify(v => v.Delete(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_GetEntity(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f
+            .With_TableClient_GetEntity_ReturningObject()
+            .GetSut();
+
+        // act
+        var actual = sut.T_GetEntity(pkey, rkey);
+
+        // assert
+        f.MockTableClient.Verify(
+            v => v.GetEntity<AzureTableEntity>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+    
+    [Theory]
+    [AutoData]
+    public async Task T_GetEntityAsync(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = await sut.T_GetEntityAsync(pkey, rkey);
+
+        // assert
+        f.MockTableClient.Verify(
+            v => v.GetEntityAsync<AzureTableEntity>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+    
+    
+    [Theory]
+    [AutoData]
+    public async Task T_GetEntityIfExists(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = sut.T_GetEntityIfExists(pkey, rkey);
+
+        // assert
+        f.MockTableClient.Verify(
+            v => v.GetEntityIfExists<AzureTableEntity>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+    
+    [Theory]
+    [AutoData]
+    public async Task T_GetEntityIfExistsAsync(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = await sut.T_GetEntityIfExistsAsync(pkey, rkey);
+
+        // assert
+        f.MockTableClient.Verify(
+            v => v.GetEntityIfExistsAsync<AzureTableEntity>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+    
+    [Theory]
+    [AutoData]
+    public async Task T_SubmitTransaction(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = sut.T_SubmitTransaction();
+
+        // assert
+        f.MockTableClient.Verify(
+            v => v.SubmitTransaction(It.IsAny<IEnumerable<TableTransactionAction>>(),It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+    
+    [Theory]
+    [AutoData]
+    public async Task T_SubmitTransactionAsync(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = await sut.T_SubmitTransactionAsync();
+
+        // assert
+        f.MockTableClient.Verify(
+            v => v.SubmitTransactionAsync(It.IsAny<IEnumerable<TableTransactionAction>>(),It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }

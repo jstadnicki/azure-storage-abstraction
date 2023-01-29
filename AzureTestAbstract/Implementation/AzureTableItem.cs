@@ -22,14 +22,17 @@ public class AzureTableItem : IAbstractTableItem
     {
     }
 
-    public static implicit operator AzureTableItem(TableItem d) => new AzureTableItem(d);
+    public string Name { get; set; }
+
+    public static implicit operator AzureTableItem(TableItem d)
+    {
+        return new(d);
+    }
 
     public static implicit operator TableItem(AzureTableItem d)
     {
         return new TableItem(d.Name);
     }
-
-    public string Name { get; set; }
 
     public static Response<IAbstractTableItem> FromTableItem(Response<TableItem> response)
     {

@@ -1,9 +1,6 @@
-﻿using Azure.Data.Tables;
-
-namespace AzureTestAbstract;
+﻿namespace AzureTestAbstract;
 
 public interface IAbstractTableItem
 {
     string Name { get; set; }
 }
-

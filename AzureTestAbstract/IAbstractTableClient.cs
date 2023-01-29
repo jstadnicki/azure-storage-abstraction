@@ -4,20 +4,18 @@ using Azure.Data.Tables;
 using Azure.Data.Tables.Models;
 using Azure.Data.Tables.Sas;
 
-
 namespace AzureTestAbstract;
 
 // @formatter:off
 public interface IAbstractTableClient
 {
-    void Create();
-    void AddEntity(IAbstractTableEntity entity);
+    
     public Pageable<T> Query<T>(Expression<Func<T, bool>> filter, int? maxPerPage = null, IEnumerable<string> select = null,CancellationToken cancellationToken = default) where T : class, IAbstractTableEntity, new();
     Pageable<T> Query<T>(string filter = null,int? maxPerPage = null,IEnumerable<string> select = null,CancellationToken cancellationToken = default) where T : IAbstractTableEntity, new();
     TableSasBuilder GetSasBuilder(TableSasPermissions permissions, DateTimeOffset expiresOn);
     TableSasBuilder GetSasBuilder(string rawPermissions, DateTimeOffset expiresOn);
     Response<IAbstractTableItem> Create(CancellationToken cancellationToken = default);
-    Task<Task<Response<IAbstractTableItem>>> CreateAsync(CancellationToken cancellationToken = default);
+    Task<Response<IAbstractTableItem>> CreateAsync(CancellationToken cancellationToken = default);
     Response<IAbstractTableItem> CreateIfNotExists(CancellationToken cancellationToken = default);
     Task<Task<Response<IAbstractTableItem>>> CreateIfNotExistsAsync(CancellationToken cancellationToken = default);
     Response Delete(CancellationToken cancellationToken = default);
@@ -43,6 +41,5 @@ public interface IAbstractTableClient
     Task<Response<IReadOnlyList<Response>>> SubmitTransactionAsync(IEnumerable<TableTransactionAction> transactionActions,CancellationToken cancellationToken = default);
     Response<IReadOnlyList<Response>> SubmitTransaction(IEnumerable<TableTransactionAction> transactionActions,CancellationToken cancellationToken = default);
     Uri GenerateSasUri(TableSasPermissions permissions, DateTimeOffset expiresOn);
-    Uri GenerateSasUri(TableSasBuilder builder);
-}
+    Uri GenerateSasUri(TableSasBuilder builder);}
 // @formatter:on
