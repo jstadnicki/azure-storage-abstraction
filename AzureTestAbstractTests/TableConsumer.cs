@@ -1,6 +1,8 @@
-﻿using Azure;
+﻿using System.Runtime.CompilerServices;
+using Azure;
 using Azure.Data.Tables;
 using Azure.Data.Tables.Models;
+using Azure.Data.Tables.Sas;
 using AzureTestAbstract.Implementation;
 using Newtonsoft.Json;
 
@@ -60,17 +62,17 @@ public class TableConsumer
     {
         return _abstractTableClient.GetEntity<AzureTableEntity>(pKey, rKey);
     }
-    
+
     public async Task<Response<AzureTableEntity>> T_GetEntityAsync(string pKey, string rKey)
     {
         return await _abstractTableClient.GetEntityAsync<AzureTableEntity>(pKey, rKey);
     }
-    
+
     public NullableResponse<AzureTableEntity> T_GetEntityIfExists(string pKey, string rKey)
     {
         return _abstractTableClient.GetEntityIfExists<AzureTableEntity>(pKey, rKey);
     }
-    
+
     public async Task<NullableResponse<AzureTableEntity>> T_GetEntityIfExistsAsync(string pKey, string rKey)
     {
         return await _abstractTableClient.GetEntityIfExistsAsync<AzureTableEntity>(pKey, rKey);
@@ -81,13 +83,88 @@ public class TableConsumer
         var t = new List<TableTransactionAction> { new TableTransactionAction(TableTransactionActionType.Add, new TableEntity()) };
         return _abstractTableClient.SubmitTransaction(t);
     }
-    
+
     public async Task<Response<IReadOnlyList<Response>>> T_SubmitTransactionAsync()
     {
         var t = new List<TableTransactionAction> { new TableTransactionAction(TableTransactionActionType.Add, new TableEntity()) };
         return await _abstractTableClient.SubmitTransactionAsync(t);
     }
+
+    public Response T_UpsertEntity()
+    {
+        var e = new AzureTableEntity();
+        return _abstractTableClient.UpsertEntity(e);
+    }
+
+    public async Task<Response> T_UpsertEntityAsync()
+    {
+        var e = new AzureTableEntity();
+        return await _abstractTableClient.UpsertEntityAsync(e);
+    }
+
+    public Response T_UpdateEntity()
+    {
+        var e = new AzureTableEntity();
+        return _abstractTableClient.UpdateEntity(e, new ETag("asd"));
+    }
+
+    public async Task<Response> T_UpdateEntityAsync()
+    {
+        var e = new AzureTableEntity();
+        return await _abstractTableClient.UpdateEntityAsync(e, new ETag("asd"));
+    }
+
+    public Response T_Delete(string partitionKey, string rowKey)
+    {
+        return _abstractTableClient.DeleteEntity(partitionKey, rowKey);
+    }
+
+    public async Task<Response> T_DeleteAsync(string partitionKey, string rowKey)
+    {
+        return await _abstractTableClient.DeleteEntityAsync(partitionKey, rowKey);
+    }
+
+    public Response<IReadOnlyList<TableSignedIdentifier>> T_GetAccessPolicies()
+    {
+        return _abstractTableClient.GetAccessPolicies();
+    }
+
+    public async Task<Response<IReadOnlyList<TableSignedIdentifier>>> T_GetAccessPoliciesAsync()
+    {
+        return await _abstractTableClient.GetAccessPoliciesAsync();
+    }
+
+    public Response T_SetAccessPolicy()
+    {
+        return _abstractTableClient.SetAccessPolicy(new List<TableSignedIdentifier>());
+    }
+
+    public async Task<Response> T_SetAccessPolicyAsync()
+    {
+        return await _abstractTableClient.SetAccessPolicyAsync(new List<TableSignedIdentifier>());
+    }
+
+    public string T_CreateQueryFilter()
+    {
+        return _abstractTableClient.CreateQueryFilter<AzureTableEntity>(x => x.PartitionKey == "123");
+    }
     
+    public string T_CreateQueryFilterWithString()
+    {
+        FormattableString x = FormattableStringFactory.Create("{0}", 0); 
+        return _abstractTableClient.CreateQueryFilter(x);
+    }
+
+    public Uri T_GenerateSasUri()
+    {
+        return _abstractTableClient.GenerateSasUri(TableSasPermissions.Add, new DateTimeOffset(DateTime.Now));
+    }
+
+    public Uri T_GenerateSasUriWithSasBuilder()
+    {
+        TableSasBuilder b = new TableSasBuilder("asdoiasd", "asdasd", DateTimeOffset.Now);
+        return _abstractTableClient.GenerateSasUri(b);
+    }
 
 
     public void WorkTest()
