@@ -63,6 +63,20 @@ public class TableConsumer
         return _abstractTableClient.GetEntity<AzureTableEntity>(pKey, rKey);
     }
 
+    public Response<IAbstractTableItem> T_CreateIfNotExists()
+    {
+        return _abstractTableClient.CreateIfNotExists();
+    }
+
+    public async Task<Task<Response<IAbstractTableItem>>> T_CreateIfNotExistsAsync()
+    {
+        return await _abstractTableClient.CreateIfNotExistsAsync();
+    }
+
+    public TableSasBuilder T_GetSasBuilder() => _abstractTableClient.GetSasBuilder(TableSasPermissions.Add, DateTimeOffset.Now);
+
+    public TableSasBuilder T_GetSasBuilderWithString() => _abstractTableClient.GetSasBuilder("asad", DateTimeOffset.Now);
+
     public async Task<Response<AzureTableEntity>> T_GetEntityAsync(string pKey, string rKey)
     {
         return await _abstractTableClient.GetEntityAsync<AzureTableEntity>(pKey, rKey);

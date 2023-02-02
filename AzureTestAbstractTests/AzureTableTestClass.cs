@@ -466,7 +466,7 @@ public class AzureTableTestClassWithMock
             v => v.GenerateSasUri(It.IsAny<TableSasPermissions>(), It.IsAny<DateTimeOffset>()),
             Times.Once);
     }
-    
+
     [Theory]
     [AutoData]
     public async Task T_GenerateSasUriWithSasBuilder(TableConsumerTestsFixture f, string pkey, string rkey)
@@ -480,6 +480,70 @@ public class AzureTableTestClassWithMock
         // assert
         f.MockTableClient.Verify(
             v => v.GenerateSasUri(It.IsAny<TableSasBuilder>()),
+            Times.Once);
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_GetSasBuilder(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = sut.T_GetSasBuilder();
+
+        // assert
+        f.MockTableClient.Verify(
+            v => v.GetSasBuilder(It.IsAny<TableSasPermissions>(), It.IsAny<DateTimeOffset>()),
+            Times.Once);
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_GetSasBuilderWithString(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = sut.T_GetSasBuilderWithString();
+
+        // assert
+        f.MockTableClient.Verify(
+            v => v.GetSasBuilder(It.IsAny<string>(), It.IsAny<DateTimeOffset>()),
+            Times.Once);
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_CreateIfNotExistsAsync(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = await sut.T_CreateIfNotExistsAsync();
+
+        // assert
+        f.MockTableClient.Verify(
+            v => v.CreateIfNotExistsAsync(It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Theory]
+    [AutoData]
+    public async Task T_CreateIfNotExists(TableConsumerTestsFixture f, string pkey, string rkey)
+    {
+        // arrange
+        var sut = f.GetSut();
+
+        // act
+        var actual = sut.T_CreateIfNotExists();
+
+        // assert
+        f.MockTableClient.Verify(
+            v => v.CreateIfNotExists(It.IsAny<CancellationToken>()),
             Times.Once);
     }
 }
