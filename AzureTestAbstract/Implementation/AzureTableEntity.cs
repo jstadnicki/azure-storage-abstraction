@@ -19,7 +19,8 @@ public class AzureTableEntity : IAbstractTableEntity, ITableEntity, IDictionary<
         PartitionKey = partitionKey;
         RowKey = rowKey;
     }
-
+    
+   
     public AzureTableEntity(IDictionary<string, object> values)
     {
         _properties = values != null ? new Dictionary<string, object>(values) : new Dictionary<string, object>();
@@ -101,7 +102,7 @@ public class AzureTableEntity : IAbstractTableEntity, ITableEntity, IDictionary<
 
     public object this[string key]
     {
-        get => _properties[key];
+        get => GetValue(key);
         set => _properties[key] = value;
     }
 
@@ -126,7 +127,7 @@ public class AzureTableEntity : IAbstractTableEntity, ITableEntity, IDictionary<
     public static Task<Response<T>> FromIAbstractTableEntity<T>(Task<Response<TableEntity>> task)
         where T : IAbstractTableEntity
     {
-        Response<T> r = new AzureResponse<T>();
+        Response<T> r = new AzureResponse<T>(default);
         return Task.FromResult(r);
     }
 
@@ -144,6 +145,9 @@ public class AzureTableEntity : IAbstractTableEntity, ITableEntity, IDictionary<
     {
         return GetValue<double?>(key);
     }
+    
+    public int? GetInt32(string key) => GetValue<int?>(key);
+    public long? GetInt64(string key) => GetValue<long?>(key);
 
     private T GetValue<T>(string key)
     {

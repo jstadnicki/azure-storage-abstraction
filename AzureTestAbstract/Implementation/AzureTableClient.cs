@@ -72,18 +72,21 @@ public class AzureTableClient : IAbstractTableClient
     public Task<Response> AddEntityAsync<T>(T entity, CancellationToken cancellationToken = default) where T : ITableEntity => _wrapped.AddEntityAsync(entity, cancellationToken);
     public Response AddEntity<T>(T entity, CancellationToken cancellationToken = default) where T : ITableEntity => _wrapped.AddEntity(entity, cancellationToken);
 
-    public Response<T> GetEntity<T>(string partitionKey, string rowKey, IEnumerable<string> select = null,CancellationToken cancellationToken = default) where T : class, ITableEntity, new()
+    public Response<T> GetEntity<T>
+        (string partitionKey, string rowKey, IEnumerable<string> select = null,CancellationToken cancellationToken = default) 
+        where T : class, ITableEntity, new()
     {
         var x = _wrapped.GetEntity<TableEntity>(partitionKey, rowKey, select, cancellationToken);
         var y= AzureTableEntity.FromTableEntity(x);
-        return new AzureResponse<T>();
+        T t = y as T;
+        return new AzureResponse<T>(t);
     }
 
     public async Task<Response<T>> GetEntityAsync<T>(string partitionKey, string rowKey, IEnumerable<string> select = null,CancellationToken cancellationToken = default)
     {
         var x = await _wrapped.GetEntityAsync<TableEntity>(partitionKey, rowKey, select, cancellationToken);
         var y= AzureTableEntity.FromTableEntity(x);
-        return new AzureResponse<T>();
+        return new AzureResponse<T>(default);
     }
 
     public NullableResponse<T> GetEntityIfExists<T>(string partitionKey, string rowKey,IEnumerable<string> select = null,CancellationToken cancellationToken = default) where T : class, ITableEntity, new() => _wrapped.GetEntityIfExists<T>(partitionKey, rowKey, select, cancellationToken);

@@ -19,31 +19,44 @@ public class TableConsumer
         _serviceClient = serviceClient;
     }
 
-    public Response AddEntity(string pkey, string rkey)
+    public Response AddEntity(
+        string pkey,
+        string rkey,
+        string stringValue,
+        int intValue,
+        double doubleValue,
+        decimal decimalValue,
+        List<TableConsumerTestClass> listOfTableConsumerTestClass)
     {
         var entity = new AzureTableEntity(pkey, rkey);
-        entity["string"] = "string";
-        entity["int"] = "1";
-        entity["decimal"] = 1m.ToString();
-        entity["double"] = 1.0d.ToString();
-        entity["object"] = new object().ToString();
-        entity["json"] = JsonConvert.SerializeObject(new List<TableConsumerTestClass>
-            { new(), new() });
+
+        entity["string"] = stringValue;
+        entity["int"] = intValue;
+        entity["decimal"] = decimalValue;
+        entity["double"] = doubleValue;
+        entity["json"] = JsonConvert.SerializeObject(listOfTableConsumerTestClass);
 
         return _abstractTableClient.AddEntity(entity);
     }
 
-    public async Task<Response> AddEntityAsync(string pkey, string rkey)
+    public async Task<Response> AddEntityAsync(string pkey,
+        string rkey,
+        string stringValue,
+        int intValue,
+        double doubleValue,
+        decimal decimalValue,
+        List<TableConsumerTestClass> listOfTableConsumerTestClass, 
+        CancellationToken cancellationToken)
     {
         var entity = new AzureTableEntity(pkey, rkey);
-        entity["string"] = "string";
-        entity["int"] = "1";
-        entity["decimal"] = 1m.ToString();
-        entity["double"] = 1.0d.ToString();
-        entity["object"] = new object().ToString();
-        entity["json"] = JsonConvert.SerializeObject(new List<TableConsumerTestClass> { new(), new() });
 
-        return await _abstractTableClient.AddEntityAsync(entity);
+        entity["string"] = stringValue;
+        entity["int"] = intValue;
+        entity["decimal"] = decimalValue;
+        entity["double"] = doubleValue;
+        entity["json"] = JsonConvert.SerializeObject(listOfTableConsumerTestClass);
+
+        return await _abstractTableClient.AddEntityAsync(entity, cancellationToken);
     }
 
     public Pageable<AzureTableEntity> Query() => _abstractTableClient.Query<AzureTableEntity>(x1 => x1.PartitionKey == "123");
@@ -162,10 +175,10 @@ public class TableConsumer
     {
         return _abstractTableClient.CreateQueryFilter<AzureTableEntity>(x => x.PartitionKey == "123");
     }
-    
+
     public string T_CreateQueryFilterWithString()
     {
-        FormattableString x = FormattableStringFactory.Create("{0}", 0); 
+        FormattableString x = FormattableStringFactory.Create("{0}", 0);
         return _abstractTableClient.CreateQueryFilter(x);
     }
 
@@ -203,7 +216,7 @@ public class TableConsumer
         {
             { "Product", "Marker Set" },
             { "Price", 5.00 },
-            { "Quantity", 21 }
+            { "Quantity", 21 },
         };
 
         _abstractTableClient.AddEntity(entity);

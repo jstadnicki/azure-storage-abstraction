@@ -67,27 +67,41 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public void T_AddEntity(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_AddEntity(TableConsumerTestsFixture f, string pkey, string rkey, string stringValue, int intValue, double doubleValue,
+        decimal decimalValue)
     {
         // arrange
         var sut = f.GetSut();
 
+        var objectTableConsumerTestClass = f.TableConsumerTestClass(1).Single();
+        var listOfTableConsumerTestClass = f.TableConsumerTestClass(5).ToList();
+
         // act
-        sut.AddEntity(pkey, rkey);
+        sut.AddEntity(pkey, rkey, stringValue, intValue, doubleValue, decimalValue, listOfTableConsumerTestClass);
 
         // assert
-        f.MockTableClient.Verify(v => v.AddEntity(It.IsAny<ITableEntity>(), It.IsAny<CancellationToken>()), Times.Once);
+        f.MockTableClient.Verify(v =>
+                v.AddEntity(
+                    It.Is<ITableEntity>(entity => (
+                        (((AzureTableEntity)entity).GetString("string") == stringValue) &&
+                        (((AzureTableEntity)entity).GetDouble("double") == doubleValue) &&
+                        ((AzureTableEntity)entity).GetString("json") == Newtonsoft.Json.JsonConvert.SerializeObject(listOfTableConsumerTestClass))
+                    ),
+                    It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Theory]
     [AutoData]
-    public async Task T_AddEntityAsync(TableConsumerTestsFixture f, string pkey, string rkey)
+    public async Task T_AddEntityAsync(TableConsumerTestsFixture f, string pkey, string rkey, string stringValue, int intValue, double doubleValue,
+        decimal decimalValue)
     {
         // arrange
         var sut = f.GetSut();
-
+        var listOfTableConsumerTestClass = f.TableConsumerTestClass(5).ToList();
+        
         // act
-        await sut.AddEntityAsync(pkey, rkey);
+        await sut.AddEntityAsync(pkey, rkey, stringValue, intValue, doubleValue, decimalValue, listOfTableConsumerTestClass, default );
 
         // assert
         f.MockTableClient.Verify(v => v.AddEntityAsync(It.IsAny<ITableEntity>(), It.IsAny<CancellationToken>()), Times.Once);

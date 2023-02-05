@@ -37,6 +37,6 @@ public class AzureTableItem : IAbstractTableItem
     public static Response<IAbstractTableItem> FromTableItem(Response<TableItem> response)
     {
         var x = new AzureTableItem(response.Value);
-        return new AzureResponse<IAbstractTableItem>();
+        return new AzureResponse<IAbstractTableItem>(x);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using AutoFixture;
-using Azure.Data.Tables;
 using AzureTestAbstract.Helpers;
 using AzureTestAbstract.Implementation;
 using Moq;
@@ -23,8 +22,13 @@ public class TableConsumerTestsFixture : Fixture
     {
         MockTableClient.Setup(s =>
                 s.GetEntity<AzureTableEntity>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
-                 .Returns(new AzureResponse<AzureTableEntity>());
+                 .Returns(new AzureResponse<AzureTableEntity>(default));
         
         return this;
+    }
+
+    public IEnumerable<TableConsumer.TableConsumerTestClass> TableConsumerTestClass(int i)
+    {
+        return Build<TableConsumer.TableConsumerTestClass>().CreateMany(i);
     }
 }
