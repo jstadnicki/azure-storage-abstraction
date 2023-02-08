@@ -109,13 +109,13 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_Query(TableConsumerTestsFixture f)
+    public void T_Query(TableConsumerTestsFixture f, string pkey)
     {
         // arrange
         var sut = f.GetSut();
 
         // act
-        sut.Query();
+        sut.Query(pkey);
 
         // assert
         f.MockTableClient
@@ -130,7 +130,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_QueryWithString(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_QueryWithString(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -151,7 +151,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_Create(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_Create(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -193,7 +193,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_Delete(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_Delete(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -207,7 +207,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_GetEntity(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_GetEntity(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f
@@ -242,7 +242,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_GetEntityIfExists(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_GetEntityIfExists(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -275,7 +275,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_SubmitTransaction(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_SubmitTransaction(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -307,7 +307,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_UpsertEntity(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_UpsertEntity(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -339,7 +339,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_UpdateEntity(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_UpdateEntity(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -371,7 +371,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_GetAccessPolicies(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_GetAccessPolicies(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -387,7 +387,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_GetAccessPoliciesAsync(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_GetAccessPoliciesAsync(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -403,7 +403,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_SetAccessPolicy(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_SetAccessPolicy(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -419,7 +419,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_SetAccessPolicyAsync(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_SetAccessPolicyAsync(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -435,7 +435,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_CreateQueryFilter(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_CreateQueryFilter(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -451,7 +451,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_CreateQueryFilterWithString(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_CreateQueryFilterWithString(TableConsumerTestsFixture f, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -467,7 +467,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_GenerateSasUri(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_GenerateSasUri(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -483,7 +483,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_GenerateSasUriWithSasBuilder(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_GenerateSasUriWithSasBuilder(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -499,7 +499,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_GetSasBuilder(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_GetSasBuilder(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -515,7 +515,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_GetSasBuilderWithString(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_GetSasBuilderWithString(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();
@@ -547,7 +547,7 @@ public class AzureTableTestClassWithMock
 
     [Theory]
     [AutoData]
-    public async Task T_CreateIfNotExists(TableConsumerTestsFixture f, string pkey, string rkey)
+    public void T_CreateIfNotExists(TableConsumerTestsFixture f, string pkey, string rkey)
     {
         // arrange
         var sut = f.GetSut();

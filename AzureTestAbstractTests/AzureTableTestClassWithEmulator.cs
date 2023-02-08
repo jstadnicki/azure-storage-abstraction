@@ -9,7 +9,7 @@ namespace AzureTestAbstract;
 public class AzureTableTestClassWithEmulator
 {
     [Fact]
-    public void T_With_Emulator()
+    public void T_WorkTest()
     {
         // arrange
         var pKey = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
@@ -48,6 +48,7 @@ public class AzureTableTestClassWithEmulator
 
         var listOfTableConsumerTestClass = f.TableConsumerTestClass(5).ToList();
         var sut = new TableConsumer(azureTableClient, serviceClient);
+        sut.CreateTableIfNotExists();
 
         // act
         var response = sut.AddEntity(pkey, rkey, stringValue, intValue, doubleValue, decimalValue, listOfTableConsumerTestClass);
@@ -85,6 +86,8 @@ public class AzureTableTestClassWithEmulator
         var listOfTableConsumerTestClass = f.TableConsumerTestClass(5).ToList();
         var sut = new TableConsumer(azureTableClient, serviceClient);
 
+        await sut.CreateTableIfNotExistsAsync();
+
         // act
         var response = await sut.AddEntityAsync(pkey, rkey, stringValue, intValue, doubleValue, decimalValue, listOfTableConsumerTestClass, default);
         var actual = sut.T_GetEntity(pkey, rkey);
@@ -98,5 +101,67 @@ public class AzureTableTestClassWithEmulator
         Assert.Equal(actual.GetDouble("double"), doubleValue);
         Assert.Equal(decimal.Parse(x), decimalValue);
         Assert.Equal(actual["json"], Newtonsoft.Json.JsonConvert.SerializeObject(listOfTableConsumerTestClass));
+    }
+    
+    
+    [Theory]
+    [AutoData]
+    public void T_AddEntity_ValidateResponse(TableConsumerTestsFixture f, string pkey, string rkey, string stringValue, int intValue, double doubleValue,
+        decimal decimalValue)
+    {
+        // arrange
+        var accountKey = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
+        var accountName = "devstoreaccount1";
+        var url = "http://127.0.0.1:10002/devstoreaccount1";
+
+        var azureTableClient =
+            new AzureTableClient(new Uri(url), "tableName", new TableSharedKeyCredential(accountName, accountKey));
+        var serviceClient = new AzureTableServiceClient(url,
+            new TableSharedKeyCredential("devstoreaccount1",
+                "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="));
+
+
+        var listOfTableConsumerTestClass = f.TableConsumerTestClass(5).ToList();
+        var sut = new TableConsumer(azureTableClient, serviceClient);
+
+        // act
+        var response = sut.AddEntity(pkey, rkey, stringValue, intValue, doubleValue, decimalValue, listOfTableConsumerTestClass);
+
+        // assert
+        Assert.NotNull(response);
+        Assert.Equal(204, response.Status);
+        Assert.False(response.IsError);
+    }
+    
+    [Theory]
+    [AutoData]
+    public void T_Query(TableConsumerTestsFixture f, string pkey, string rkey, string stringValue, int intValue, double doubleValue,
+        decimal decimalValue)
+    {
+        // arrange
+        var accountKey = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
+        var accountName = "devstoreaccount1";
+        var url = "http://127.0.0.1:10002/devstoreaccount1";
+
+        var azureTableClient =
+            new AzureTableClient(new Uri(url), "tableName", new TableSharedKeyCredential(accountName, accountKey));
+        var serviceClient = new AzureTableServiceClient(url,
+            new TableSharedKeyCredential("devstoreaccount1",
+                "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="));
+
+        var listOfTableConsumerTestClass = f.TableConsumerTestClass(5).ToList();
+        var sut = new TableConsumer(azureTableClient, serviceClient);
+
+        var response = sut.AddEntity(pkey, rkey, stringValue, intValue, doubleValue, decimalValue, listOfTableConsumerTestClass);
+
+        var t = typeof(AzureTableEntity);
+        var p= t.GetProperties();
+
+        // act
+        var actual = sut.Query(pkey);
+
+        // assert
+        Assert.NotNull(actual);
+        Assert.Equal(1, actual.Count());
     }
 }

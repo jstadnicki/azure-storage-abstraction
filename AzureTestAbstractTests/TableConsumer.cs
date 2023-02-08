@@ -59,7 +59,10 @@ public class TableConsumer
         return await _abstractTableClient.AddEntityAsync(entity, cancellationToken);
     }
 
-    public Pageable<AzureTableEntity> Query() => _abstractTableClient.Query<AzureTableEntity>(x1 => x1.PartitionKey == "123");
+    public Pageable<AzureTableEntity> Query(string pkey)
+    {
+        return _abstractTableClient.Query<AzureTableEntity>(x1 => x1.PartitionKey == pkey);
+    }
 
     public Pageable<AzureTableEntity> QueryWithString() => _abstractTableClient.Query<AzureTableEntity>("partitionkey eq 123", 15);
 
@@ -206,10 +209,6 @@ public class TableConsumer
 
         foreach (var t in queryTableResults) Console.WriteLine(t.Name);
 
-        // _abstractTableClient = new AzureTableClient(storageUri, tableName, accountName, storageAccountKey);
-
-        // _abstractTableClient.Create();
-
         var partitionKey = Guid.NewGuid().ToString();
         var rowKey = Guid.NewGuid().ToString();
         var entity = new AzureTableEntity(partitionKey, rowKey)
@@ -234,5 +233,15 @@ public class TableConsumer
     {
         public string Text { get; set; } = "test";
         public int Value { get; set; } = 1;
+    }
+
+    public async Task CreateTableIfNotExistsAsync()
+    {
+        await _abstractTableClient.CreateIfNotExistsAsync();
+    }
+
+    public void CreateTableIfNotExists()
+    {
+        _abstractTableClient.CreateIfNotExists();
     }
 }

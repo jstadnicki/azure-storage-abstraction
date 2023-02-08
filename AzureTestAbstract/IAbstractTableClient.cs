@@ -10,8 +10,8 @@ namespace AzureTestAbstract;
 public interface IAbstractTableClient
 {
     
-    public Pageable<T> Query<T>(Expression<Func<T, bool>> filter, int? maxPerPage = null, IEnumerable<string> select = null,CancellationToken cancellationToken = default) where T : class, IAbstractTableEntity, new();
-    Pageable<T> Query<T>(string filter = null,int? maxPerPage = null,IEnumerable<string> select = null,CancellationToken cancellationToken = default) where T : IAbstractTableEntity, new();
+    Pageable<T> Query<T>(Expression<Func<T, bool>> filter, int? maxPerPage = null, IEnumerable<string> select = null,CancellationToken cancellationToken = default) where T : class,  IAbstractTableEntity,   new();
+    Pageable<T> Query<T>(string filter = null,int? maxPerPage = null,IEnumerable<string> select = null,CancellationToken cancellationToken = default) where T : class, IAbstractTableEntity, new();
     TableSasBuilder GetSasBuilder(TableSasPermissions permissions, DateTimeOffset expiresOn);
     TableSasBuilder GetSasBuilder(string rawPermissions, DateTimeOffset expiresOn);
     Response<IAbstractTableItem> Create(CancellationToken cancellationToken = default);

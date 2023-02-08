@@ -115,12 +115,12 @@ public class AzureTableEntity : IAbstractTableEntity, ITableEntity, IDictionary<
         return new(d.PartitionKey, d.RowKey);
     }
 
-    public static AzureTableEntity FromTableEntity(Response<TableEntity> r)
+    public static AzureTableEntity FromTableEntity(Response<TableEntity> r) => FromTableEntity(r.Value);
+
+    public static AzureTableEntity FromTableEntity(TableEntity d)
     {
-        var d = r.Value;
         var ate = new AzureTableEntity(d.PartitionKey, d.RowKey);
         foreach (var v in d) ate[v.Key] = d[v.Key];
-
         return ate;
     }
 
@@ -198,4 +198,6 @@ public class AzureTableEntity : IAbstractTableEntity, ITableEntity, IDictionary<
         public const string ETag = "ETag";
         public const string OdataMetadata = "odata.metadata";
     }
+
+    
 }

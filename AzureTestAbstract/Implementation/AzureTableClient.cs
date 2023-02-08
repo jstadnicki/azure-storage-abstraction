@@ -32,25 +32,39 @@ public class AzureTableClient : IAbstractTableClient
     public virtual Uri Uri 
         => _wrapped.Uri;
 
-    public Pageable<T> Query<T>(Expression<Func<T, bool>> filter, int? maxPerPage = null, IEnumerable<string> select = null,CancellationToken cancellationToken = default) where T : class, IAbstractTableEntity, new()
+    public Pageable<T> Query<T>(Expression<Func<T, bool>> filter, int? maxPerPage = null, IEnumerable<string> select = null,CancellationToken cancellationToken = default)
+        where T : class, IAbstractTableEntity, new()
     {
-        var e = MyExpressionVisitor2.Convert(filter);
-        var x = _wrapped.Query(e, maxPerPage, select, cancellationToken);
+        var param = Expression.Parameter(typeof(TableEntity));
+        var body = new Visitor<TableEntity>(param).Visit(filter.Body);
+        Expression<Func<TableEntity, bool>> lambda = Expression.Lambda<Func<TableEntity, bool>>(body, param);
+        Pageable<TableEntity> x = _wrapped.Query(lambda, maxPerPage, select, cancellationToken);
+        List<AzureTableEntity> azureTableEntities = x.Select(AzureTableEntity.FromTableEntity).ToList();
+        List<T> iATE = azureTableEntities.Cast<T>().ToList();
+        Page<T> page = Page<T>.FromValues(iATE, null,null);
+        List<Page<T>> pages = new List<Page<T>>{page};
+        var test = pages.First() as Page<T>;
+        var pagest = pages.Select(x=> x as Page<T>);
+        var p = Pageable<T>.FromPages(pagest);   
         
-        var pages = x.AsPages().Select(pg =>
-            Page<IAbstractTableEntity>.FromValues(pg.Values.Cast<IAbstractTableEntity>().ToList(), null, null));
+        return p;
         
-        return Pageable<T>.FromPages((IEnumerable<Page<T>>)pages);
     }
 
-    public Pageable<T> Query<T>(string filter = null, int? maxPerPage = null, IEnumerable<string> select = null, CancellationToken cancellationToken = default) where T : IAbstractTableEntity, new()
+    public Pageable<T> Query<T>
+        (string filter = null, int? maxPerPage = null, IEnumerable<string> select = null, CancellationToken cancellationToken = default) 
+        where T : class, IAbstractTableEntity, new()
     {
-        var x = _wrapped.Query<TableEntity>(filter, maxPerPage, select, cancellationToken);
-        
-        var pages = x.AsPages().Select(pg =>
-            Page<IAbstractTableItem>.FromValues(pg.Values.Cast<IAbstractTableItem>().ToList(), null, null));
-        
-        return Pageable<T>.FromPages((IEnumerable<Page<T>>)pages);
+        Pageable<TableEntity>? tableEntities = _wrapped.Query<TableEntity>(filter, maxPerPage, select, cancellationToken);
+        List<AzureTableEntity> azureTableEntities = tableEntities.Select(AzureTableEntity.FromTableEntity).ToList();
+        List<T> iATE = azureTableEntities.Cast<T>().ToList();
+        Page<T> page = Page<T>.FromValues(iATE, null,null);
+        List<Page<T>> pages = new List<Page<T>>{page};
+        var test = pages.First() as Page<T>;
+        var pagest = pages.Select(x=> x as Page<T>);
+        var p = Pageable<T>.FromPages(pagest);
+      
+      return p;
     }
 
     public TableSasBuilder GetSasBuilder(TableSasPermissions permissions, DateTimeOffset expiresOn) => _wrapped.GetSasBuilder(permissions, expiresOn);
